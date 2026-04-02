@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crown Molding Angle Calculator — Compound Miter and Bevel | WoodCalc</title>
+<meta name="description" content="Calculate compound miter and bevel angles for crown molding. Inside corners, outside corners, any spring angle. Free woodworking calculator.">
+<meta property="og:title" content="Crown Molding Angle Calculator — WoodCalc">
+<meta property="og:description" content="Compound miter and bevel angles for crown molding at any spring angle and corner angle.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://thehivemakes.github.io/hive-wood-calc/crown-molding.html">
+<link rel="stylesheet" href="style.css">
+<script src="js/calc-core.js"></script>
+</head>
+<body>
+<header><div class="header-inner"><div class="logo">Wood<span>Calc</span></div><div class="tagline">Free woodworking calculators</div></div></header>
+<nav><div class="nav-inner"><a href="index.html">WoodCalc</a><span class="sep">/</span><span>Crown Molding Angles</span></div></nav>
+<main>
+  <div class="ad-leaderboard" id="ad-top">Ad</div>
+
+  <div class="card">
+    <h1>Crown Molding Angle Calculator</h1>
+    <p class="subtitle">Compound miter and bevel saw settings for crown molding at any spring angle and corner angle.</p>
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="springAngle">Spring angle (°)</label>
+        <select id="springAngle">
+          <option value="38">38° (most common)</option>
+          <option value="45">45° (large crown)</option>
+          <option value="52">52° (cathedral)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="cornerAngle">Corner angle (°)</label>
+        <input type="number" id="cornerAngle" min="1" max="179" step="0.5" placeholder="90" value="90">
+      </div>
+    </div>
+
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">Corner type:</p>
+    <div class="radio-group">
+      <label><input type="radio" name="cornerType" value="inside" checked> Inside corner</label>
+      <label><input type="radio" name="cornerType" value="outside"> Outside corner</label>
+    </div>
+
+    <button class="btn btn-primary" onclick="calculate()">Calculate</button>
+    <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
+
+    <div class="result" id="result">
+      <div class="result-row">
+        <span class="result-label">Miter angle (saw miter)</span>
+        <span class="result-value" id="miterAngle">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Bevel angle (saw bevel/tilt)</span>
+        <span class="result-value" id="bevelAngle">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Corner type</span>
+        <span class="result-value" id="cornerTypeOut">—</span>
+      </div>
+      <div class="result-note" id="saw-note"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:16px;font-weight:700;margin-bottom:12px;">Common Crown Molding Settings</h2>
+    <table class="ref-table" id="ref-table">
+      <thead><tr><th>Spring°</th><th>Corner°</th><th>Miter°</th><th>Bevel°</th></tr></thead>
+      <tbody>
+        <tr><td>38</td><td>90</td><td>31.6°</td><td>33.9°</td></tr>
+        <tr><td>45</td><td>90</td><td>35.3°</td><td>30.0°</td></tr>
+        <tr><td>52</td><td>90</td><td>38.8°</td><td>25.2°</td></tr>
+        <tr><td>38</td><td>135</td><td>16.5°</td><td>18.4°</td></tr>
+        <tr><td>45</td><td>135</td><td>18.4°</td><td>16.1°</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="ad-rectangle" id="ad-mid">Ad</div>
+
+  <div class="seo-section">
+    <h2>How Crown Molding Compound Angles Work</h2>
+    <p>Crown molding sits at an angle between the wall and ceiling, called the spring angle. Because the molding is tilted, a simple 45-degree miter cut won't create a tight joint at corners. Instead, you need compound angles — a miter setting and a bevel (blade tilt) setting used together.</p>
+    <p>The spring angle is measured from the wall to the back of the molding. Most standard crown molding has a 38-degree spring angle (also called 38/52, meaning 38° from the wall, 52° from the ceiling). Larger crown profiles often use 45 degrees.</p>
+    <p>For a standard 90-degree inside corner with 38° spring angle, set your miter saw to 31.6° miter and 33.9° bevel. For outside corners at the same settings, the miter direction reverses but the angles stay the same.</p>
+    <p>This calculator handles any combination of spring angle and corner angle, including non-90° corners found in bay windows, angled walls, and custom trim work.</p>
+  </div>
+</main>
+<footer>Free woodworking calculators. No signup, no tracking. Verify critical measurements before cutting.<br>Built by <a href="https://thehivemakes.github.io/" style="color:var(--accent)">The Hive</a></footer>
+<script>
+function calculate() {
+  const spring = parseFloat(CalcCore.getSelect('springAngle'));
+  const corner = CalcCore.get('cornerAngle');
+  const type = document.querySelector('input[name="cornerType"]:checked').value;
+
+  if (isNaN(spring) || isNaN(corner) || corner <= 0 || corner >= 180) return;
+
+  const toRad = Math.PI / 180;
+  const toDeg = 180 / Math.PI;
+
+  // Half the corner angle
+  const halfCorner = corner / 2;
+
+  // Compound angle formulas:
+  // Miter = arctan(sin(spring) / tan(halfCorner))
+  // Bevel = arcsin(cos(spring) × cos(miter))
+  // Simplified standard formulas for crown molding:
+  const miterRad = Math.atan(Math.sin(spring * toRad) / Math.tan(halfCorner * toRad));
+  const miter = Math.abs(miterRad * toDeg);
+  const bevel = Math.asin(Math.cos(spring * toRad) * Math.cos(miterRad)) * toDeg;
+
+  CalcCore.set('miterAngle', CalcCore.fmt(miter, 1) + '°');
+  CalcCore.set('bevelAngle', CalcCore.fmt(bevel, 1) + '°');
+  CalcCore.set('cornerTypeOut', type === 'inside' ? 'Inside corner' : 'Outside corner');
+
+  let note = '';
+  if (type === 'inside') {
+    note = `Set miter saw to ${CalcCore.fmt(miter,1)}° miter. Set blade tilt to ${CalcCore.fmt(bevel,1)}° bevel. For inside corners, the miter cuts go in opposite directions on each piece — the long point of each piece is against the wall.`;
+  } else {
+    note = `Set miter saw to ${CalcCore.fmt(miter,1)}° miter. Set blade tilt to ${CalcCore.fmt(bevel,1)}° bevel. For outside corners, the long point of each piece faces outward from the corner.`;
+  }
+  document.getElementById('saw-note').textContent = note;
+
+  CalcCore.showResult();
+  CalcCore.saveParams(['springAngle', 'cornerAngle']);
+}
+
+function clearAll() {
+  document.getElementById('springAngle').value = '38';
+  document.getElementById('cornerAngle').value = '90';
+  document.querySelector('input[name="cornerType"][value="inside"]').checked = true;
+  document.getElementById('result').classList.remove('visible');
+  history.replaceState(null, '', window.location.pathname);
+}
+
+document.addEventListener('DOMContentLoaded', () => { if (window.location.search) calculate(); });
+</script>
+</body>
+</html>

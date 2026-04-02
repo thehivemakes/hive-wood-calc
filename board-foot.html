@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Board Foot Calculator — Free Lumber Estimator | WoodCalc</title>
+<meta name="description" content="Calculate board feet from thickness, width, and length. Estimate lumber costs with price per board foot. Free, instant, works on mobile.">
+<meta property="og:title" content="Board Foot Calculator — WoodCalc">
+<meta property="og:description" content="Calculate board feet and lumber costs. Enter dimensions, get instant results.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://thehivemakes.github.io/hive-wood-calc/board-foot.html">
+<!-- ADSENSE PLACEHOLDER -->
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+<link rel="stylesheet" href="style.css">
+<script src="js/calc-core.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Board Foot Calculator",
+  "url": "https://thehivemakes.github.io/hive-wood-calc/board-foot.html",
+  "description": "Calculate board feet from lumber dimensions and estimate costs.",
+  "applicationCategory": "UtilityApplication",
+  "operatingSystem": "Any"
+}
+</script>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="logo">Wood<span>Calc</span></div>
+    <div class="tagline">Free woodworking calculators</div>
+  </div>
+</header>
+<nav>
+  <div class="nav-inner">
+    <a href="index.html">WoodCalc</a>
+    <span class="sep">/</span>
+    <span>Board Foot Calculator</span>
+  </div>
+</nav>
+<main>
+  <!-- ADSENSE: Leaderboard -->
+  <div class="ad-leaderboard" id="ad-top">Ad</div>
+
+  <div class="card">
+    <h1>Board Foot Calculator</h1>
+    <p class="subtitle">Calculate board feet and estimate lumber cost from thickness, width, and length.</p>
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="thickness">Thickness (inches)</label>
+        <input type="number" id="thickness" min="0.25" step="0.25" placeholder="1" value="1">
+      </div>
+      <div class="field">
+        <label for="width">Width (inches)</label>
+        <input type="number" id="width" min="0.5" step="0.5" placeholder="6">
+      </div>
+      <div class="field">
+        <label for="length">Length (feet)</label>
+        <input type="number" id="length" min="1" step="1" placeholder="8">
+      </div>
+      <div class="field">
+        <label for="qty">Quantity</label>
+        <input type="number" id="qty" min="1" step="1" placeholder="1" value="1">
+      </div>
+      <div class="field">
+        <label for="price">Price per BF ($) <span style="font-weight:400;text-transform:none">(optional)</span></label>
+        <input type="number" id="price" min="0" step="0.25" placeholder="5.50">
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="calculate()">Calculate</button>
+    <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
+
+    <div class="result" id="result">
+      <div class="result-row">
+        <span class="result-label">Board feet (per piece)</span>
+        <span class="result-value" id="bf-each">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Total board feet</span>
+        <span class="result-value" id="bf-total">—</span>
+      </div>
+      <div class="result-row" id="cost-row" style="display:none">
+        <span class="result-label">Estimated cost</span>
+        <span class="result-value" id="cost">—</span>
+      </div>
+      <div class="result-note">
+        Board foot = (thickness × width × length) ÷ 144, where thickness and width are in inches and length is in inches. One board foot = 144 cubic inches of lumber.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:16px;font-weight:700;margin-bottom:12px;">Common Lumber Sizes</h2>
+    <table class="ref-table" id="ref-table">
+      <thead>
+        <tr><th>Nominal</th><th>Actual (in)</th><th>BF per 8 ft</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1×4</td><td>0.75 × 3.5</td><td>1.75</td></tr>
+        <tr><td>1×6</td><td>0.75 × 5.5</td><td>2.75</td></tr>
+        <tr><td>1×8</td><td>0.75 × 7.25</td><td>3.63</td></tr>
+        <tr><td>1×10</td><td>0.75 × 9.25</td><td>4.63</td></tr>
+        <tr><td>1×12</td><td>0.75 × 11.25</td><td>5.63</td></tr>
+        <tr><td>2×4</td><td>1.5 × 3.5</td><td>3.50</td></tr>
+        <tr><td>2×6</td><td>1.5 × 5.5</td><td>5.50</td></tr>
+        <tr><td>2×8</td><td>1.5 × 7.25</td><td>7.25</td></tr>
+        <tr><td>2×10</td><td>1.5 × 9.25</td><td>9.25</td></tr>
+        <tr><td>2×12</td><td>1.5 × 11.25</td><td>11.25</td></tr>
+        <tr><td>4/4 hardwood</td><td>1.0 × varies</td><td>width ÷ 1.5</td></tr>
+        <tr><td>8/4 hardwood</td><td>2.0 × varies</td><td>width × 1.33</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ADSENSE: Rectangle -->
+  <div class="ad-rectangle" id="ad-mid">Ad</div>
+
+  <div class="seo-section">
+    <h2>How to Calculate Board Feet</h2>
+    <p>A board foot is a unit of volume equal to 144 cubic inches — equivalent to a piece of wood 1 inch thick, 12 inches wide, and 12 inches long. Lumber yards price hardwood by the board foot, making this calculation essential for project planning and budgeting.</p>
+    <p>The formula is straightforward: multiply thickness (inches) by width (inches) by length (inches), then divide by 144. For length in feet, the formula simplifies to: (thickness × width × length in feet) ÷ 12.</p>
+    <p>When buying rough-sawn hardwood, thickness is often expressed in quarters: 4/4 is 1 inch, 5/4 is 1.25 inches, 6/4 is 1.5 inches, and 8/4 is 2 inches. These are rough thicknesses before planing.</p>
+  </div>
+</main>
+<footer>
+  Free woodworking calculators. No signup, no tracking. Verify critical measurements before cutting.
+  <br>Built by <a href="https://thehivemakes.github.io/" style="color:var(--accent)">The Hive</a>
+</footer>
+<script>
+function calculate() {
+  const t = CalcCore.get('thickness');
+  const w = CalcCore.get('width');
+  const l = CalcCore.get('length');
+  const q = CalcCore.get('qty') || 1;
+  const p = CalcCore.get('price');
+
+  if (isNaN(t) || isNaN(w) || isNaN(l) || t <= 0 || w <= 0 || l <= 0) return;
+
+  const bfEach = (t * w * l) / 12;
+  const bfTotal = bfEach * q;
+
+  CalcCore.set('bf-each', CalcCore.fmt(bfEach));
+  CalcCore.set('bf-total', CalcCore.fmt(bfTotal));
+
+  const costRow = document.getElementById('cost-row');
+  if (!isNaN(p) && p > 0) {
+    CalcCore.set('cost', '$' + CalcCore.fmt(bfTotal * p));
+    costRow.style.display = '';
+  } else {
+    costRow.style.display = 'none';
+  }
+
+  CalcCore.showResult();
+  CalcCore.saveParams(['thickness', 'width', 'length', 'qty', 'price']);
+}
+
+function clearAll() {
+  ['thickness', 'width', 'length', 'qty', 'price'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = id === 'thickness' ? '1' : id === 'qty' ? '1' : '';
+  });
+  document.getElementById('result').classList.remove('visible');
+  history.replaceState(null, '', window.location.pathname);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.location.search) calculate();
+});
+</script>
+</body>
+</html>

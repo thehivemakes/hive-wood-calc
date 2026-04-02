@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wood Shrinkage Calculator — Seasonal Movement Estimator | WoodCalc</title>
+<meta name="description" content="Estimate wood dimensional change from moisture content shifts. Tangential, radial, and volumetric shrinkage for common species. Free woodworking tool.">
+<meta property="og:title" content="Wood Shrinkage Calculator — WoodCalc">
+<meta property="og:description" content="Estimate how much wood moves with moisture changes. Per-species shrinkage data.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://thehivemakes.github.io/hive-wood-calc/wood-shrinkage.html">
+<link rel="stylesheet" href="style.css">
+<script src="js/calc-core.js"></script>
+</head>
+<body>
+<header><div class="header-inner"><div class="logo">Wood<span>Calc</span></div><div class="tagline">Free woodworking calculators</div></div></header>
+<nav><div class="nav-inner"><a href="index.html">WoodCalc</a><span class="sep">/</span><span>Wood Shrinkage</span></div></nav>
+<main>
+  <div class="ad-leaderboard" id="ad-top">Ad</div>
+
+  <div class="card">
+    <h1>Wood Shrinkage Calculator</h1>
+    <p class="subtitle">Estimate dimensional change when wood gains or loses moisture. Essential for tabletops, panels, and seasonal joints.</p>
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="species">Wood species</label>
+        <select id="species">
+          <option value="red_oak">Red Oak</option>
+          <option value="white_oak">White Oak</option>
+          <option value="hard_maple">Hard Maple</option>
+          <option value="cherry">Cherry</option>
+          <option value="walnut">Black Walnut</option>
+          <option value="ash">White Ash</option>
+          <option value="poplar">Yellow Poplar</option>
+          <option value="pine_white">Eastern White Pine</option>
+          <option value="pine_yellow">Southern Yellow Pine</option>
+          <option value="cedar_red">Western Red Cedar</option>
+          <option value="douglas_fir">Douglas Fir</option>
+          <option value="mahogany">Genuine Mahogany</option>
+          <option value="teak">Teak</option>
+          <option value="custom">Custom (enter values)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="dimension">Board width (inches)</label>
+        <input type="number" id="dimension" min="0.5" step="0.125" placeholder="12">
+      </div>
+      <div class="field">
+        <label for="mcStart">Starting MC (%)</label>
+        <input type="number" id="mcStart" min="0" max="30" step="0.5" placeholder="12" value="12">
+      </div>
+      <div class="field">
+        <label for="mcEnd">Ending MC (%)</label>
+        <input type="number" id="mcEnd" min="0" max="30" step="0.5" placeholder="6" value="6">
+      </div>
+    </div>
+
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">Grain orientation:</p>
+    <div class="radio-group">
+      <label><input type="radio" name="grain" value="tangential" checked> Flat-sawn (tangential)</label>
+      <label><input type="radio" name="grain" value="radial"> Quarter-sawn (radial)</label>
+    </div>
+
+    <div class="form-grid" id="customFields" style="display:none;">
+      <div class="field">
+        <label for="customTan">Custom tangential shrinkage (%)</label>
+        <input type="number" id="customTan" min="0" max="15" step="0.1" placeholder="7.5">
+      </div>
+      <div class="field">
+        <label for="customRad">Custom radial shrinkage (%)</label>
+        <input type="number" id="customRad" min="0" max="10" step="0.1" placeholder="4.0">
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="calculate()">Calculate</button>
+    <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
+
+    <div class="result" id="result">
+      <div class="result-row">
+        <span class="result-label">Dimensional change</span>
+        <span class="result-value" id="change">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">New width</span>
+        <span class="result-value" id="newWidth">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Change as fraction</span>
+        <span class="result-value" id="fraction">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Direction</span>
+        <span class="result-value" id="direction">—</span>
+      </div>
+      <div class="result-note">
+        Wood moves below the fiber saturation point (~28-30% MC). Movement is proportional to moisture change. Tangential shrinkage (flat-sawn) is roughly twice radial (quarter-sawn). Plan gaps and joinery accordingly.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:16px;font-weight:700;margin-bottom:12px;">Shrinkage by Species (green to oven-dry)</h2>
+    <table class="ref-table" id="ref-table">
+      <thead><tr><th>Species</th><th>Tangential %</th><th>Radial %</th><th>T/R Ratio</th></tr></thead>
+      <tbody>
+        <tr><td>Red Oak</td><td>8.6</td><td>4.0</td><td>2.15</td></tr>
+        <tr><td>White Oak</td><td>10.5</td><td>5.6</td><td>1.88</td></tr>
+        <tr><td>Hard Maple</td><td>9.9</td><td>4.8</td><td>2.06</td></tr>
+        <tr><td>Cherry</td><td>7.1</td><td>3.7</td><td>1.92</td></tr>
+        <tr><td>Black Walnut</td><td>7.8</td><td>5.5</td><td>1.42</td></tr>
+        <tr><td>White Ash</td><td>7.8</td><td>4.9</td><td>1.59</td></tr>
+        <tr><td>Yellow Poplar</td><td>8.2</td><td>4.6</td><td>1.78</td></tr>
+        <tr><td>E. White Pine</td><td>6.1</td><td>2.1</td><td>2.90</td></tr>
+        <tr><td>S. Yellow Pine</td><td>7.7</td><td>4.8</td><td>1.60</td></tr>
+        <tr><td>W. Red Cedar</td><td>5.0</td><td>2.4</td><td>2.08</td></tr>
+        <tr><td>Douglas Fir</td><td>7.6</td><td>4.8</td><td>1.58</td></tr>
+        <tr><td>Mahogany</td><td>5.1</td><td>3.7</td><td>1.38</td></tr>
+        <tr><td>Teak</td><td>4.0</td><td>2.6</td><td>1.54</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:11px;color:var(--muted);margin-top:8px;">Source: USDA Forest Products Laboratory Wood Handbook, Chapter 4.</p>
+  </div>
+
+  <div class="ad-rectangle" id="ad-mid">Ad</div>
+
+  <div class="seo-section">
+    <h2>Understanding Wood Movement</h2>
+    <p>Wood is hygroscopic — it absorbs and releases moisture from the air. As moisture content changes, wood dimensions change. This movement is the single biggest cause of cracked tabletops, stuck drawers, and failed glue joints in woodworking.</p>
+    <p>Movement occurs primarily across the grain, not along it. Tangential shrinkage (flat-sawn boards) is roughly twice radial shrinkage (quarter-sawn). This is why quarter-sawn lumber is prized for stability — it moves about half as much as flat-sawn.</p>
+    <p>The fiber saturation point (FSP) is approximately 28-30% moisture content for most species. Below FSP, wood shrinks as it dries and swells as it absorbs moisture. Above FSP, dimensional change stops even though the wood can hold more water.</p>
+    <p>For indoor furniture, expect seasonal MC swings of 4-8% depending on climate and HVAC. A 12-inch flat-sawn red oak tabletop could move over 1/8 inch across its width through the seasons. Always allow for this movement in your joinery.</p>
+  </div>
+</main>
+<footer>Free woodworking calculators. No signup, no tracking. Verify critical measurements before cutting.<br>Built by <a href="https://thehivemakes.github.io/" style="color:var(--accent)">The Hive</a></footer>
+<script>
+const SPECIES_DATA = {
+  red_oak:      { tan: 8.6, rad: 4.0 },
+  white_oak:    { tan: 10.5, rad: 5.6 },
+  hard_maple:   { tan: 9.9, rad: 4.8 },
+  cherry:       { tan: 7.1, rad: 3.7 },
+  walnut:       { tan: 7.8, rad: 5.5 },
+  ash:          { tan: 7.8, rad: 4.9 },
+  poplar:       { tan: 8.2, rad: 4.6 },
+  pine_white:   { tan: 6.1, rad: 2.1 },
+  pine_yellow:  { tan: 7.7, rad: 4.8 },
+  cedar_red:    { tan: 5.0, rad: 2.4 },
+  douglas_fir:  { tan: 7.6, rad: 4.8 },
+  mahogany:     { tan: 5.1, rad: 3.7 },
+  teak:         { tan: 4.0, rad: 2.6 }
+};
+
+const FSP = 28; // Fiber saturation point
+
+document.getElementById('species').addEventListener('change', function() {
+  document.getElementById('customFields').style.display = this.value === 'custom' ? '' : 'none';
+});
+
+function calculate() {
+  const speciesKey = CalcCore.getSelect('species');
+  const dim = CalcCore.get('dimension');
+  const mcStart = CalcCore.get('mcStart');
+  const mcEnd = CalcCore.get('mcEnd');
+  const grain = document.querySelector('input[name="grain"]:checked').value;
+
+  if (isNaN(dim) || isNaN(mcStart) || isNaN(mcEnd) || dim <= 0) return;
+
+  let tanPct, radPct;
+  if (speciesKey === 'custom') {
+    tanPct = CalcCore.get('customTan');
+    radPct = CalcCore.get('customRad');
+    if (isNaN(tanPct) || isNaN(radPct)) return;
+  } else {
+    const sp = SPECIES_DATA[speciesKey];
+    if (!sp) return;
+    tanPct = sp.tan;
+    radPct = sp.rad;
+  }
+
+  // Shrinkage coefficient per 1% MC change (below FSP)
+  const shrinkPct = grain === 'tangential' ? tanPct : radPct;
+  const coeff = shrinkPct / FSP; // % change per 1% MC
+
+  // Clamp MC values to 0-FSP range for calculation
+  const effectiveStart = Math.min(mcStart, FSP);
+  const effectiveEnd = Math.min(mcEnd, FSP);
+  const mcDelta = effectiveStart - effectiveEnd;
+
+  // Dimensional change
+  const changePct = coeff * mcDelta;
+  const changeInches = dim * (changePct / 100);
+  const newWidth = dim - changeInches;
+
+  CalcCore.set('change', (changeInches >= 0 ? '+' : '') + CalcCore.fmt(changeInches, 4) + '"');
+  CalcCore.set('newWidth', CalcCore.fmt(newWidth, 4) + '"');
+  CalcCore.set('direction', mcDelta > 0 ? 'Shrinking (drying)' : mcDelta < 0 ? 'Swelling (gaining moisture)' : 'No change');
+
+  // Convert to nearest fraction
+  const absFrac = Math.abs(changeInches);
+  let fracStr = '< 1/64"';
+  const fractions = [[1,2],[1,4],[1,8],[3,16],[1,16],[3,32],[1,32],[1,64]];
+  for (const [n,d] of fractions) {
+    if (absFrac >= (n/d - 0.005)) { fracStr = '~' + n + '/' + d + '"'; break; }
+  }
+  CalcCore.set('fraction', fracStr);
+
+  CalcCore.showResult();
+  CalcCore.saveParams(['species', 'dimension', 'mcStart', 'mcEnd']);
+}
+
+function clearAll() {
+  document.getElementById('species').value = 'red_oak';
+  document.getElementById('dimension').value = '';
+  document.getElementById('mcStart').value = '12';
+  document.getElementById('mcEnd').value = '6';
+  document.querySelector('input[name="grain"][value="tangential"]').checked = true;
+  document.getElementById('customFields').style.display = 'none';
+  document.getElementById('result').classList.remove('visible');
+  history.replaceState(null, '', window.location.pathname);
+}
+
+document.addEventListener('DOMContentLoaded', () => { if (window.location.search) calculate(); });
+</script>
+</body>
+</html>

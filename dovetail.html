@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dovetail Spacing Calculator — Hand-Cut Joint Layout | WoodCalc</title>
+<meta name="description" content="Calculate even dovetail pin and tail spacing for hand-cut joints. Set pin-to-tail ratio, half-pin width, and board width. Free woodworking tool.">
+<meta property="og:title" content="Dovetail Spacing Calculator — WoodCalc">
+<meta property="og:description" content="Even dovetail layout for hand-cut joints. Pin spacing, tail width, and half-pin sizing.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://thehivemakes.github.io/hive-wood-calc/dovetail.html">
+<link rel="stylesheet" href="style.css">
+<script src="js/calc-core.js"></script>
+</head>
+<body>
+<header><div class="header-inner"><div class="logo">Wood<span>Calc</span></div><div class="tagline">Free woodworking calculators</div></div></header>
+<nav><div class="nav-inner"><a href="index.html">WoodCalc</a><span class="sep">/</span><span>Dovetail Spacing</span></div></nav>
+<main>
+  <div class="ad-leaderboard" id="ad-top">Ad</div>
+
+  <div class="card">
+    <h1>Dovetail Spacing Calculator</h1>
+    <p class="subtitle">Calculate evenly spaced pins and tails for hand-cut dovetail joints.</p>
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="boardWidth">Board width (inches)</label>
+        <input type="number" id="boardWidth" min="1" step="0.125" placeholder="6">
+      </div>
+      <div class="field">
+        <label for="numTails">Number of tails</label>
+        <input type="number" id="numTails" min="1" max="20" step="1" placeholder="3" value="3">
+      </div>
+      <div class="field">
+        <label for="halfPin">Half-pin width (inches)</label>
+        <input type="number" id="halfPin" min="0.125" step="0.0625" placeholder="0.375" value="0.375">
+      </div>
+      <div class="field">
+        <label for="ratio">Tail-to-pin ratio</label>
+        <select id="ratio">
+          <option value="2">2:1 (traditional)</option>
+          <option value="3">3:1 (fine furniture)</option>
+          <option value="1.5">1.5:1 (sturdy)</option>
+          <option value="1">1:1 (even)</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="calculate()">Calculate</button>
+    <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
+
+    <div class="result" id="result">
+      <div class="result-row">
+        <span class="result-label">Tail width</span>
+        <span class="result-value" id="tailWidth">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Pin width (narrow face)</span>
+        <span class="result-value" id="pinWidth">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Half-pin width</span>
+        <span class="result-value" id="halfPinOut">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Number of full pins</span>
+        <span class="result-value" id="numPins">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Layout check (total)</span>
+        <span class="result-value" id="checkTotal">—</span>
+      </div>
+      <div class="result-note" id="layout-note"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:16px;font-weight:700;margin-bottom:12px;">Dovetail Angle Guide</h2>
+    <table class="ref-table">
+      <thead><tr><th>Wood Type</th><th>Recommended Angle</th><th>Ratio</th></tr></thead>
+      <tbody>
+        <tr><td>Hardwood (oak, maple, walnut)</td><td>7°–8°</td><td>1:8 to 1:7</td></tr>
+        <tr><td>Medium (cherry, ash)</td><td>9°–11°</td><td>1:6 to 1:5</td></tr>
+        <tr><td>Softwood (pine, cedar)</td><td>12°–14°</td><td>1:5 to 1:4</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="ad-rectangle" id="ad-mid">Ad</div>
+
+  <div class="seo-section">
+    <h2>How to Space Dovetails Evenly</h2>
+    <p>Dovetail joints are one of the strongest and most visually striking woodworking joints. Even spacing creates a professional look and ensures the joint's mechanical strength is distributed evenly across the board.</p>
+    <p>The layout starts with two half-pins at each edge of the board. The remaining space is divided between tails and full pins. The tail-to-pin ratio determines the visual character: a 2:1 ratio is traditional (tails are twice as wide as pins), while 3:1 creates a more delicate look for fine furniture.</p>
+    <p>This calculator determines the exact width of each tail and pin given your board width, number of tails, half-pin width, and desired ratio. Mark these measurements directly on your board for precise hand-cutting.</p>
+  </div>
+</main>
+<footer>Free woodworking calculators. No signup, no tracking. Verify critical measurements before cutting.<br>Built by <a href="https://thehivemakes.github.io/" style="color:var(--accent)">The Hive</a></footer>
+<script>
+function calculate() {
+  const bw = CalcCore.get('boardWidth');
+  const nt = CalcCore.get('numTails');
+  const hp = CalcCore.get('halfPin');
+  const ratio = parseFloat(CalcCore.getSelect('ratio'));
+
+  if (isNaN(bw) || isNaN(nt) || isNaN(hp) || bw <= 0 || nt < 1 || hp <= 0) return;
+
+  const numPins = nt - 1;
+  // Available space = board width - 2 half pins
+  const available = bw - (2 * hp);
+  if (available <= 0) return;
+
+  // n tails + (n-1) pins, where tail = ratio × pin
+  // available = nt × tailW + numPins × pinW
+  // available = nt × (ratio × pinW) + numPins × pinW
+  // available = pinW × (nt × ratio + numPins)
+  const pinW = available / (nt * ratio + numPins);
+  const tailW = pinW * ratio;
+
+  // Verification
+  const checkTotal = (2 * hp) + (nt * tailW) + (numPins * pinW);
+
+  CalcCore.set('tailWidth', CalcCore.fmt(tailW, 3) + '"');
+  CalcCore.set('pinWidth', CalcCore.fmt(pinW, 3) + '"');
+  CalcCore.set('halfPinOut', CalcCore.fmt(hp, 3) + '"');
+  CalcCore.set('numPins', numPins);
+  CalcCore.set('checkTotal', CalcCore.fmt(checkTotal, 3) + '"');
+
+  // Build layout description
+  let layout = 'Layout from left edge: ';
+  layout += `HP(${CalcCore.fmt(hp,3)}) → `;
+  for (let i = 0; i < nt; i++) {
+    layout += `Tail(${CalcCore.fmt(tailW,3)})`;
+    if (i < numPins) layout += ` → Pin(${CalcCore.fmt(pinW,3)}) → `;
+  }
+  layout += ` → HP(${CalcCore.fmt(hp,3)})`;
+  document.getElementById('layout-note').textContent = layout;
+
+  CalcCore.showResult();
+  CalcCore.saveParams(['boardWidth', 'numTails', 'halfPin', 'ratio']);
+}
+
+function clearAll() {
+  document.getElementById('boardWidth').value = '';
+  document.getElementById('numTails').value = '3';
+  document.getElementById('halfPin').value = '0.375';
+  document.getElementById('ratio').value = '2';
+  document.getElementById('result').classList.remove('visible');
+  history.replaceState(null, '', window.location.pathname);
+}
+
+document.addEventListener('DOMContentLoaded', () => { if (window.location.search) calculate(); });
+</script>
+</body>
+</html>

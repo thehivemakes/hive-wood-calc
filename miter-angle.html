@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Miter Angle Calculator — Cut Angles for Any Shape | WoodCalc</title>
+<meta name="description" content="Calculate miter angles for any number of sides. Picture frames, boxes, hexagons, octagons, and custom polygons. Free, instant woodworking tool.">
+<meta property="og:title" content="Miter Angle Calculator — WoodCalc">
+<meta property="og:description" content="Find miter saw angles for picture frames, boxes, and any polygon.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://thehivemakes.github.io/hive-wood-calc/miter-angle.html">
+<link rel="stylesheet" href="style.css">
+<script src="js/calc-core.js"></script>
+</head>
+<body>
+<header><div class="header-inner"><div class="logo">Wood<span>Calc</span></div><div class="tagline">Free woodworking calculators</div></div></header>
+<nav><div class="nav-inner"><a href="index.html">WoodCalc</a><span class="sep">/</span><span>Miter Angle Calculator</span></div></nav>
+<main>
+  <div class="ad-leaderboard" id="ad-top">Ad</div>
+
+  <div class="card">
+    <h1>Miter Angle Calculator</h1>
+    <p class="subtitle">Find the miter saw angle for any regular polygon — picture frames, boxes, hexagons, and more.</p>
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="sides">Number of sides</label>
+        <input type="number" id="sides" min="3" max="100" step="1" placeholder="4" value="4">
+      </div>
+      <div class="field">
+        <label for="corner">Corner angle (°) <span style="font-weight:400;text-transform:none">(auto or custom)</span></label>
+        <input type="number" id="corner" min="1" max="179" step="0.1" placeholder="auto">
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="calculate()">Calculate</button>
+    <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
+
+    <div class="result" id="result">
+      <div class="result-row">
+        <span class="result-label">Interior angle</span>
+        <span class="result-value" id="interior">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Miter angle (set saw to)</span>
+        <span class="result-value" id="miter">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Complementary (90° − miter)</span>
+        <span class="result-value" id="complement">—</span>
+      </div>
+      <div class="result-note">
+        For a regular polygon: interior angle = (n − 2) × 180° ÷ n. Miter angle = 180° ÷ n, which is half the exterior angle. Set your miter saw to this angle from the fence.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:16px;font-weight:700;margin-bottom:12px;">Common Miter Angles</h2>
+    <table class="ref-table" id="ref-table">
+      <thead><tr><th>Shape</th><th>Sides</th><th>Interior°</th><th>Miter°</th></tr></thead>
+      <tbody>
+        <tr><td>Triangle</td><td>3</td><td>60.0°</td><td>60.0°</td></tr>
+        <tr><td>Square / Rectangle</td><td>4</td><td>90.0°</td><td>45.0°</td></tr>
+        <tr><td>Pentagon</td><td>5</td><td>108.0°</td><td>36.0°</td></tr>
+        <tr><td>Hexagon</td><td>6</td><td>120.0°</td><td>30.0°</td></tr>
+        <tr><td>Octagon</td><td>8</td><td>135.0°</td><td>22.5°</td></tr>
+        <tr><td>Decagon</td><td>10</td><td>144.0°</td><td>18.0°</td></tr>
+        <tr><td>Dodecagon</td><td>12</td><td>150.0°</td><td>15.0°</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="ad-rectangle" id="ad-mid">Ad</div>
+
+  <div class="seo-section">
+    <h2>How to Calculate Miter Angles</h2>
+    <p>A miter joint connects two pieces at an angle. For a regular polygon (all sides equal), the miter angle is simply 180 divided by the number of sides. A square frame has 4 sides, so the miter angle is 180 ÷ 4 = 45 degrees.</p>
+    <p>For non-square corners (like a bay window or custom frame), you can enter the corner angle directly. The miter angle is half the supplement of the corner angle: miter = (180 − corner angle) ÷ 2.</p>
+    <p>On most miter saws, the angle scale reads from 0° (straight cut) to 45° or beyond. The "miter angle" result from this calculator is the angle to set on your saw fence.</p>
+  </div>
+</main>
+<footer>Free woodworking calculators. No signup, no tracking. Verify critical measurements before cutting.<br>Built by <a href="https://thehivemakes.github.io/" style="color:var(--accent)">The Hive</a></footer>
+<script>
+function calculate() {
+  const n = CalcCore.get('sides');
+  const customCorner = CalcCore.get('corner');
+
+  if (isNaN(n) || n < 3) return;
+
+  let interior, miter;
+  if (!isNaN(customCorner) && customCorner > 0 && customCorner < 180) {
+    interior = customCorner;
+    miter = (180 - customCorner) / 2;
+  } else {
+    interior = ((n - 2) * 180) / n;
+    miter = 180 / n;
+  }
+
+  CalcCore.set('interior', CalcCore.fmt(interior, 1) + '°');
+  CalcCore.set('miter', CalcCore.fmt(miter, 1) + '°');
+  CalcCore.set('complement', CalcCore.fmt(90 - miter, 1) + '°');
+  CalcCore.showResult();
+  CalcCore.saveParams(['sides', 'corner']);
+}
+
+function clearAll() {
+  document.getElementById('sides').value = '4';
+  document.getElementById('corner').value = '';
+  document.getElementById('result').classList.remove('visible');
+  history.replaceState(null, '', window.location.pathname);
+}
+
+document.addEventListener('DOMContentLoaded', () => { if (window.location.search) calculate(); });
+</script>
+</body>
+</html>
